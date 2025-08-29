@@ -5,6 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Who Has My Back? — PSA Fundraiser</title>
 <meta name="description" content="Pick one or more jersey numbers (1–31) and donate the total. Supports classroom supplies, scholarships, and student-led projects at Premier Soccer Academy.">
+
+<!-- 4) Typography: Inter -->
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+
 <style>
   :root{
     --psa-blue:#003DA5;     /* primary */
@@ -16,42 +21,71 @@
     --muted:#5B677A;
     --border:#E6EAF0;
     --taken:#EEF2F7;
-    --shadow:0 10px 24px rgba(15,23,42,.08);
+    --shadow-lg:0 18px 40px rgba(15,23,42,.14);
+    --shadow-sm:0 10px 24px rgba(15,23,42,.08);
+    --radius:16px;
+    --radius-pill:999px;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
   body{
     margin:0; background:var(--bg); color:var(--ink);
-    font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji;
+    font-family:'Inter', ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
     line-height:1.45;
     padding-bottom:96px; /* space for sticky bar */
   }
 
-  header{text-align:center; padding:20px 16px 10px}
-  .crest{width:128px; height:auto; display:block; margin:0 auto 8px; filter:drop-shadow(0 6px 14px rgba(0,0,0,.08))}
-  h1{margin:6px 0 6px; font-size:clamp(24px,5vw,38px); letter-spacing:.2px; color:var(--psa-blue)}
-  .sub{margin:0 auto; color:var(--muted); max-width:780px; font-size:clamp(14px,2.8vw,16px)}
+  /* 1) Hero gradient banner */
+  .hero{
+    position:relative;
+    background:linear-gradient(135deg, #003DA5 0%, #2857C5 70%);
+    color:#fff;
+    padding:28px 16px 20px;
+    overflow:hidden;
+  }
+  .hero::after{
+    content:"";
+    position:absolute; inset:0;
+    background:radial-gradient(1200px 300px at -10% -20%, rgba(255,255,255,.12), transparent 60%),
+               radial-gradient(1000px 280px at 120% -30%, rgba(255,255,255,.10), transparent 60%);
+    pointer-events:none;
+  }
+  header{text-align:center; position:relative; z-index:1}
+  .crest{width:128px; height:auto; display:block; margin:0 auto 10px; filter:drop-shadow(0 6px 14px rgba(0,0,0,.22))}
+  h1{margin:6px 0 6px; font-size:clamp(24px,5vw,40px); letter-spacing:.2px}
+  .sub{margin:0 auto; color:#e6eefc; max-width:780px; font-size:clamp(14px,2.8vw,16px)}
 
   .wrap{max-width:1100px; margin:0 auto; padding:16px}
-  .card{background:var(--surface); border:1px solid var(--border); border-radius:16px; padding:18px; box-shadow:var(--shadow); margin-bottom:16px}
+
+  /* 2) Cards: more spacing + softer/larger shadow */
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:var(--radius);
+    padding:22px;
+    box-shadow:var(--shadow-lg);
+    margin:18px 0;
+  }
 
   /* Progress */
-  .progressRow{display:grid; grid-template-columns:1fr; gap:8px; margin:4px 0 0}
-  .progress{background:#EEF2F7; border-radius:12px; overflow:hidden; position:relative; height:14px}
+  .progressRow{display:grid; grid-template-columns:1fr; gap:8px; margin-top:4px}
+  .progress{background:#cbd5e1; border-radius:12px; overflow:hidden; position:relative; height:14px}
   .progress > div{height:100%; background:var(--psa-blue); width:0%; transition:width .3s ease}
   .progressMeta{display:flex; justify-content:space-between; font-size:13px; color:#475569}
 
   /* Legend + grid */
   .legend{display:flex; gap:10px; align-items:center; justify-content:center; flex-wrap:wrap; margin-bottom:14px}
-  .pill{background:#EEF2F7; border-radius:999px; padding:6px 12px; font-size:13px; color:#334155}
-  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(96px,1fr)); gap:16px; padding:10px 6px}
+  .pill{background:#EEF2F7; border-radius:var(--radius-pill); padding:6px 12px; font-size:13px; color:#334155}
+  .grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(100px,1fr)); gap:18px; padding:10px 6px}
 
   /* Soccer-ball style circular tiles */
-  .tile{width:100%; aspect-ratio:1/1; border-radius:50%; border:2px solid #D7DEE8;
+  .tile{
+    width:100%; aspect-ratio:1/1; border-radius:50%; border:2px solid #D7DEE8;
     background:radial-gradient(circle at 50% 50%, #FFFFFF 40%, #F0F4F8 100%);
     position:relative; cursor:pointer; transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
     display:flex; align-items:center; justify-content:center;
-    box-shadow: inset 0 8px 16px rgba(15,23,42,.06), 0 3px 8px rgba(15,23,42,.05);}
+    box-shadow: inset 0 8px 16px rgba(15,23,42,.06), 0 3px 8px rgba(15,23,42,.05);
+  }
   .tile:hover{transform:translateY(-2px)}
   .tile .num{font-weight:800; font-size:28px; z-index:2; color:var(--psa-blue)}
   .tile .amt{position:absolute; bottom:8px; font-size:12px; color:#667085}
@@ -63,13 +97,25 @@
   .tile.disabled{cursor:not-allowed; background:var(--taken); color:#94A3B8; border-color:#D7DEE8; box-shadow:none}
   .tile.disabled .amt{color:#94A3B8}
 
-  .cta{margin:8px 0 0; text-align:center; font-size:14px; color:#64748B}
+  .cta{margin:8px 0 0; text-align:center; font-size:14px; color:#334155}
 
-  /* Sticky footer bar */
+  /* 3) Buttons: consistent pill style + hover */
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    border-radius:var(--radius-pill); padding:12px 16px; font-weight:800; text-decoration:none; border:1px solid var(--border);
+    transition:transform .12s ease, filter .12s ease, box-shadow .12s ease;
+  }
+  .btn:hover{transform:translateY(-1px); filter:saturate(110%)}
+  .btn:active{transform:translateY(0)}
+  .btn.applecash{background:#111827; color:#fff}
+  .btn.venmo{background:#008cff; color:#fff}
+  .btn.paypal{background:#ffc439; color:#111827}
+  .btn.cashapp{background:#00c244; color:#fff}
+
+  /* Sticky footer bar (desktop layout) */
   .footerBar{
     position:fixed; bottom:0; left:0; right:0;
-    background:rgba(255,255,255,.98); backdrop-filter:saturate(180%) blur(8px);
-    border-top:3px solid var(--psa-blue);
+    background:#fff; border-top:3px solid var(--psa-blue);
     padding:16px; box-shadow:0 -8px 18px rgba(15,23,42,.06);
     z-index:5000;
   }
@@ -77,42 +123,48 @@
   .summary{color:#334155; font-size:15px}
   .summary strong{font-size:18px}
   .btnPrimary{
-    background:var(--psa-blue); color:#fff; border:none; border-radius:12px; padding:12px 18px; font-weight:800; cursor:pointer;
+    background:var(--psa-blue); color:#fff; border:none; border-radius:var(--radius-pill); padding:12px 20px; font-weight:800; cursor:pointer;
     box-shadow:0 6px 14px rgba(0,61,165,.28); transition:background .15s ease}
   .btnPrimary:hover{background:var(--psa-blue-2)}
   .btnPrimary:disabled{opacity:.55; cursor:not-allowed; box-shadow:none}
   .taglist{display:inline-flex; gap:6px; flex-wrap:wrap; margin-left:8px; vertical-align:middle}
-  .tag{background:#EEF2F7; color:#334155; padding:4px 8px; border-radius:999px; font-size:12px}
+  .tag{background:#EEF2F7; color:#334155; padding:4px 8px; border-radius:var(--radius-pill); font-size:12px}
+
+  /* 8) Mobile-first sticky CTA: collapse to single big button */
+  @media (max-width:600px){
+    .barInner{gap:10px}
+    .summary{flex:1 1 100%; order:2}
+    .btnPrimary{flex:1 1 100%; order:1; font-size:16px; padding:14px 18px}
+    .taglist{display:none} /* hide tags on very small screens to avoid clutter */
+  }
 
   /* Modal */
   .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center;
     background:rgba(15,23,42,.78); backdrop-filter:blur(6px); padding:20px; z-index:9999}
   .modal.open{display:flex}
-  .sheet{background:#fff; width:min(560px,100%); border-radius:16px; padding:20px; box-shadow:0 14px 36px rgba(15,23,42,.25)}
+  .sheet{
+    background:#fff; width:min(560px,100%); border-radius:var(--radius); padding:22px; box-shadow:var(--shadow-sm)
+  }
   .sheet h3{margin:6px 0 6px}
   .sheet p{margin:4px 0 14px; color:#475569}
-  .payrow{display:grid; grid-template-columns:1fr; gap:10px}
-  .btn{display:flex; align-items:center; justify-content:center; gap:10px;
-    border-radius:12px; padding:12px; font-weight:800; text-decoration:none; border:1px solid var(--border)}
-  .btn.applecash{background:#111827; color:#fff}
-  .btn.venmo{background:#008cff; color:#fff}
-  .btn.paypal{background:#ffc439; color:#111827}
-  .btn.cashapp{background:#00c244; color:#fff}
+  .payrow{display:grid; grid-template-columns:1fr; gap:12px}
   .close{display:inline-block; margin-top:12px; color:#64748b; cursor:pointer}
   .small{font-size:12px; color:#64748b}
 
-  /* Page lock when modal open */
   body.modal-open{overflow:hidden}
   .modal.open ~ .footerBar{display:none}
 </style>
 </head>
 <body>
-<header>
-  <!-- PSA logo file lives next to this HTML -->
-  <img src="psa-logo.png" alt="Premier Soccer Academy crest" class="crest">
-  <h1>Who Has My Back?</h1>
-  <p class="sub">Pick one or more jersey numbers (1–31) and donate the total. 100% of proceeds support classroom supplies, scholarships, and student-led projects.</p>
-</header>
+
+<!-- HERO (gradient) -->
+<div class="hero">
+  <header>
+    <img src="psa-logo.png" alt="Premier Soccer Academy crest" class="crest">
+    <h1>Who Has My Back?</h1>
+    <p class="sub">Pick one or more jersey numbers (1–31) and donate the total. 100% of proceeds support classroom supplies, scholarships, and student-led projects.</p>
+  </header>
+</div>
 
 <div class="wrap">
   <!-- Progress -->
@@ -174,31 +226,28 @@
 </div>
 
 <script>
-  // ===== CONFIG =====
   const CONFIG = {
     contactEmail: "csgentry@outlook.com",
-    venmoUser: "Csgentry",        // Venmo username without @
-    paypalMe:  "CodyGentry",      // PayPal.me handle without @
-    cashTag:   "CGentry212",      // Cash App cashtag without $
-    goal: 496,                    // 1..31 summed
-    takenNumbers: [],             // e.g., [7, 12, 21] — update as you go
-    appleCashPhone: "13175077258" // for sms: include country code
+    venmoUser: "Csgentry",
+    paypalMe:  "CodyGentry",
+    cashTag:   "CGentry212",
+    goal: 496,
+    takenNumbers: [],
+    appleCashPhone: "13175077258"
   };
 
   function sum(arr){ return arr.reduce((s,x)=>s+x,0); }
-
   const selected = new Set();
   const grid = document.getElementById("grid");
+  const takenSet = new Set(CONFIG.takenNumbers);
 
   // Build grid 1..31
-  const takenSet = new Set(CONFIG.takenNumbers);
   for (let n=1;n<=31;n++){
     const tile = document.createElement("button");
     tile.className = "tile";
     tile.setAttribute("role","listitem");
     tile.setAttribute("aria-label", "Toggle jersey number " + n + " ($" + n + ")");
     tile.innerHTML = `<div class="num">${n}</div><div class="amt">$${n}</div>`;
-
     if (takenSet.has(n)){
       tile.classList.add("disabled"); tile.disabled = true; tile.title = "Taken"; tile.setAttribute("aria-disabled","true");
     } else {
@@ -219,12 +268,17 @@
     const total = sum(arr);
     document.getElementById("count").textContent = arr.length;
     document.getElementById("total").textContent = `$${total}`;
+
+    // Update mobile CTA label
+    const payBtn = document.getElementById("payBtn");
+    payBtn.textContent = arr.length ? `Pay for Selected ($${total})` : `Pay Selected`;
+
     const chosen = document.getElementById("chosen");
     chosen.innerHTML = "";
     arr.forEach(n=>{ const span=document.createElement("span"); span.className="tag"; span.textContent=`#${n}`; chosen.appendChild(span); });
 
-    document.getElementById("payBtn").disabled = arr.length===0;
-    document.getElementById("nums").textContent = arr.map(n=>`#${n}`).join(", ");
+    payBtn.disabled = arr.length===0;
+    document.getElementById("nums").textContent = arr.join(", ");
     document.getElementById("amtShow").textContent = `$${total}`;
 
     buildAppleCashLink(arr, total);
@@ -234,37 +288,29 @@
 
   // Apple Cash via SMS/iMessage (prefilled message)
   function buildAppleCashLink(arr, total){
-    const phone = CONFIG.appleCashPhone; // include country code
+    const phone = CONFIG.appleCashPhone;
     const bodyText = `PSA Fundraiser - I would like to pay for jerseys ${arr.join(', ')}. Total $${total}.`;
     const body = encodeURIComponent(bodyText);
-
-    // iOS Safari uses sms:+1...&body= ; many Androids prefer sms:?body=
     const isiOS = /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent);
     const href = isiOS ? `sms:${phone}&body=${body}` : `sms:${phone}?body=${body}`;
-
-    const btn = document.getElementById("payAppleCash");
-    btn.href = href;
+    document.getElementById("payAppleCash").href = href;
   }
 
-  // ----- UPDATED: payment link builders (fixes for Venmo/PayPal/Cash App) -----
+  // Venmo / PayPal.me / Cash App links (amount handling tuned)
   function buildOtherLinks(total, arr){
-    // Use plain numbers in notes (no '#') to avoid weird parsing
     const numbersDisplay = arr.join(", ");
-
-    // VENMO: amount + note supported; keep ASCII-only message
     const venNote = encodeURIComponent(`PSA Fundraiser - Jerseys ${numbersDisplay}`);
     const venName = CONFIG.venmoUser;
+
     const venApp = `venmo://paycharge?txn=pay&recipients=${encodeURIComponent(venName)}&amount=${total}&note=${venNote}`;
     const venWeb = `https://venmo.com/${encodeURIComponent(venName)}?txn=pay&amount=${total}&note=${venNote}`;
     const venBtn = document.getElementById("payVenmo");
     venBtn.href = venApp;
     venBtn.onclick = function(){ setTimeout(()=>{ window.open(venWeb,"_blank","noopener"); }, 250); };
 
-    // PAYPAL.ME: amount ONLY (no note in URL). If amount is missing it goes to profile.
     const pp = CONFIG.paypalMe;
     document.getElementById("payPayPal").href = `https://www.paypal.me/${encodeURIComponent(pp)}/${total}`;
 
-    // CASH APP: amount ONLY; no note support via URL.
     const cash = CONFIG.cashTag;
     document.getElementById("payCashApp").href = `https://cash.app/$${encodeURIComponent(cash)}/${total}`;
   }
@@ -276,8 +322,9 @@
   document.getElementById("closeBtn").addEventListener("click", ()=>{ modal.classList.remove("open"); bodyEl.classList.remove("modal-open"); });
   modal.addEventListener("click", (e)=>{ if(e.target===modal){ modal.classList.remove("open"); bodyEl.classList.remove("modal-open"); } });
 
+  // Progress bar (manual; update takenNumbers in CONFIG when you confirm payments)
   function renderProgress(){
-    const raised = CONFIG.takenNumbers.reduce((acc,n)=>acc+n,0); // update this array as numbers are claimed
+    const raised = CONFIG.takenNumbers.reduce((acc,n)=>acc+n,0);
     const pct = Math.max(0, Math.min(100, (raised/CONFIG.goal)*100));
     document.getElementById("bar").style.width = pct + "%";
     document.getElementById("raisedLabel").textContent = `$${raised} raised`;
