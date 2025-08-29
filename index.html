@@ -71,7 +71,8 @@
   .tag{background:#eef2f7;color:#334155;padding:4px 8px;border-radius:999px;font-size:12px}
 
   /* Modal */
-  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,.45);padding:20px}
+  .modal{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(15,23,42,.72);
+    backdrop-filter: blur(6px); padding:20px; z-index:9999} /* darker + blur */
   .modal.open{display:flex}
   .sheet{background:#fff;width:min(560px,100%);border-radius:16px;padding:20px;box-shadow:0 14px 36px rgba(15,23,42,.25)}
   .sheet h3{margin:6px 0 6px}
@@ -85,11 +86,10 @@
   .close{display:inline-block;margin-top:12px;color:#64748b;cursor:pointer}
   .small{font-size:12px;color:#64748b}
 
-  /* Supporters wall */
-  .wall{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:12px}
-  .supporter{background:#fff;border:1px solid var(--border);border-radius:12px;padding:12px}
-  .supporter .name{font-weight:700}
-  .muted{color:#64748b;font-size:13px}
+  /* Hide sticky bar when modal is open */
+  .modal.open ~ .footerBar{display:none}
+  /* Prevent scroll when modal open */
+  body.modal-open{overflow:hidden}
 </style>
 </head>
 <body>
@@ -123,13 +123,6 @@
     <div id="grid" class="grid" role="list"></div>
     <div class="cta">Questions? Email <a href="mailto:csgentry@outlook.com">csgentry@outlook.com</a></div>
   </section>
-
-  <!-- Supporters wall -->
-  <section class="card">
-    <strong>Supporters Wall</strong>
-    <div id="wall" class="wall" style="margin-top:10px"></div>
-    <div id="noSupporters" class="muted" style="margin-top:8px;display:none">Be the first to donate and claim a jersey number!</div>
-  </section>
 </div>
 
 <!-- Sticky footer -->
@@ -157,7 +150,10 @@
       <a id="payPayPal" class="btn paypal" target="_blank" rel="noopener">Pay with PayPal</a>
       <a id="payCashApp" class="btn cashapp" target="_blank" rel="noopener">Pay with Cash App</a>
     </div>
-    <div class="small" style="margin-top:10px">
+    <div class="small" id="stripeHint" style="margin-top:10px; display:none;">
+      Amount copied — paste <span id="copiedAmt">$0</span> on the Stripe page.
+    </div>
+    <div class="small" style="margin-top:6px">
       Notes include “PSA Fundraiser — Jerseys #X, #Y”. If a number is double-selected, first completed payment wins.
     </div>
     <span class="close" id="closeBtn" role="button" tabindex="0">Close</span>
@@ -174,29 +170,19 @@
     stripePaymentLink: "https://buy.stripe.com/8x29AL9xW2rM5Hc1Dx9Zm00", // your live link
     feePassThrough: true,         // donor covers Stripe fee on Stripe button
     goal: 496,                    // 1..31 summed
-    takenNumbers: [],             // e.g., [7, 12, 21]
-    // Supporters list (optional). Each item: { name: "The Smith Family", numbers: [12,5], message: "Go PSA!" }
-    supporters: [
-      // Example:
-      // { name: "The Smith Family", numbers: [12], message: "Go PSA!" }
-    ]
+    takenNumbers: []              // e.g., [7, 12, 21]
   };
 
-  // ===== Helpers =====
   function grossUp(amount) {
     if (!CONFIG.feePassThrough) return amount;
     return Math.round(((amount + 0.30) / 0.971) * 100) / 100; // 2.9% + $0.30
   }
   function sum(arr){ return arr.reduce((s,x)=>s+x,0); }
 
-  // ===== Build grid =====
   const selected = new Set();
   const grid = document.getElementById("grid");
 
-  // Build a Set of taken numbers from config.supporters + takenNumbers
   const takenSet = new Set(CONFIG.takenNumbers);
-  CONFIG.supporters.forEach(s => (s.numbers||[]).forEach(n => takenSet.add(n)));
-
   for (let n=1;n<=31;n++){
     const tile = document.createElement("button");
     tile.className = "tile";
@@ -219,97 +205,71 @@
     renderBar();
   }
 
-  // ===== Sticky bar + modal links =====
   function renderBar(){
     const arr = Array.from(selected).sort((a,b)=>a-b);
     const total = sum(arr);
     document.getElementById("count").textContent = arr.length;
     document.getElementById("total").textContent = `$${total}`;
-
     const chosen = document.getElementById("chosen");
     chosen.innerHTML = "";
     arr.forEach(n=>{ const span=document.createElement("span"); span.className="tag"; span.textContent=`#${n}`; chosen.appendChild(span); });
-
     document.getElementById("payBtn").disabled = arr.length===0;
-
-    // For modal
     document.getElementById("nums").textContent = arr.map(n=>`#${n}`).join(", ");
     document.getElementById("amtShow").textContent = `$${total}`;
     const withFees = grossUp(total);
     document.getElementById("amtWithFees").textContent = `$${withFees.toFixed(2)}`;
-
-    buildStripeLink(total, arr);
+    document.getElementById("copiedAmt").textContent = `$${withFees.toFixed(2)}`;
+    buildStripeBehavior(total, withFees, arr);
     buildOtherLinks(total, arr);
+    renderProgress();
   }
 
-  function buildStripeLink(total, arr){
+  // Stripe: copy amount to clipboard and open link
+  function buildStripeBehavior(total, withFees, arr){
     const btn = document.getElementById("payStripe");
     const link = CONFIG.stripePaymentLink;
     if (!link){ btn.style.display="none"; return; }
-    const charge = grossUp(total);
-    const cents = Math.round(charge * 100);
-    // Many donation links accept ?amount= (cents). If not, supporter can enter the amount on the Stripe page.
-    btn.href = `${link}?amount=${cents}`;
-    btn.textContent = `Pay $${charge.toFixed(2)} (Apple Pay / Card)`;
+    btn.href = link; // open the link; donor enters/pastes the amount
+    btn.onclick = function(e){
+      // copy amount so donor can paste into Stripe
+      const amtText = withFees.toFixed(2);
+      navigator.clipboard?.writeText(amtText).then(()=>{
+        document.getElementById("stripeHint").style.display = "block";
+      }).catch(()=>{ /* clipboard may be blocked; harmless */ });
+      // let the link continue to open Stripe
+    };
   }
 
   function buildOtherLinks(total, arr){
     const note = encodeURIComponent("PSA Fundraiser — Jerseys " + arr.map(n=>"#"+n).join(", "));
-    // Venmo
     const venName = CONFIG.venmoUser;
     const venApp = `venmo://paycharge?txn=pay&recipients=${encodeURIComponent(venName)}&amount=${total}&note=${note}`;
     const venWeb = `https://venmo.com/${encodeURIComponent(venName)}?txn=pay&amount=${total}&note=${note}`;
     const venBtn = document.getElementById("payVenmo");
     venBtn.href = venApp;
     venBtn.onclick = function(){ setTimeout(()=>{ window.open(venWeb,"_blank","noopener"); }, 250); };
-
-    // PayPal.me
     const pp = CONFIG.paypalMe;
     document.getElementById("payPayPal").href = `https://www.paypal.me/${encodeURIComponent(pp)}/${total}?note=${note}`;
-
-    // Cash App
     const cash = CONFIG.cashTag;
     document.getElementById("payCashApp").href = `https://cash.app/$${encodeURIComponent(cash)}/${total}`;
   }
 
-  // Modal controls
+  // Modal + page lock
   const modal = document.getElementById("modal");
-  document.getElementById("payBtn").addEventListener("click", ()=>{ if(selected.size>0){ modal.classList.add("open"); } });
-  document.getElementById("closeBtn").addEventListener("click", ()=>modal.classList.remove("open"));
-  modal.addEventListener("click", (e)=>{ if(e.target===modal){ modal.classList.remove("open"); } });
+  const bodyEl = document.body;
+  document.getElementById("payBtn").addEventListener("click", ()=>{ if(selected.size>0){ modal.classList.add("open"); bodyEl.classList.add("modal-open"); } });
+  document.getElementById("closeBtn").addEventListener("click", ()=>{ modal.classList.remove("open"); bodyEl.classList.remove("modal-open"); document.getElementById("stripeHint").style.display="none"; });
+  modal.addEventListener("click", (e)=>{ if(e.target===modal){ modal.classList.remove("open"); bodyEl.classList.remove("modal-open"); document.getElementById("stripeHint").style.display="none"; } });
 
-  // ===== Progress & Supporters Wall =====
-  function renderProgressAndWall(){
-    // Total raised = sum of jersey numbers from supporters (not grossed-up fees)
-    const raised = CONFIG.supporters.reduce((acc, s)=> acc + sum(s.numbers||[]), 0);
+  function renderProgress(){
+    const raised = CONFIG.takenNumbers.reduce((acc,n)=>acc+n,0); // manual update by you
     const pct = Math.max(0, Math.min(100, (raised/CONFIG.goal)*100));
     document.getElementById("bar").style.width = pct + "%";
     document.getElementById("raisedLabel").textContent = `$${raised} raised`;
     document.getElementById("goalLabel").textContent = `Goal: $${CONFIG.goal}`;
-
-    // Wall
-    const wall = document.getElementById("wall");
-    wall.innerHTML = "";
-    if (!CONFIG.supporters.length){
-      document.getElementById("noSupporters").style.display = "block";
-    } else {
-      document.getElementById("noSupporters").style.display = "none";
-      CONFIG.supporters.forEach(s=>{
-        const card = document.createElement("div");
-        card.className = "supporter";
-        card.innerHTML = `
-          <div class="name">${s.name || "Anonymous"}</div>
-          <div class="muted">Jerseys: ${(s.numbers||[]).map(n=>"#"+n).join(", ") || "-"}</div>
-          ${s.message ? `<div class="muted" style="margin-top:6px">“${s.message}”</div>` : ""}
-        `;
-        wall.appendChild(card);
-      });
-    }
   }
 
-  // Init
   renderBar();
-  renderProgressAndWall();
 </script>
 </body>
 </html>
