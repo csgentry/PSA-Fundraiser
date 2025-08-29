@@ -108,6 +108,7 @@
 </head>
 <body>
 <header>
+  <!-- PSA logo file lives next to this HTML -->
   <img src="psa-logo.png" alt="Premier Soccer Academy crest" class="crest">
   <h1>Who Has My Back?</h1>
   <p class="sub">Pick one or more jersey numbers (1–31) and donate the total. 100% of proceeds support classroom supplies, scholarships, and student-led projects.</p>
@@ -165,7 +166,7 @@
     </div>
 
     <div class="small" style="margin-top:8px">
-      The Apple Cash button opens a text to <strong>317-507-7258</strong> with your jersey numbers and total pre-filled.
+      Apple Cash opens a text to <strong>317-507-7258</strong> with your numbers and total pre-filled.
       If a number is double-selected, first completed payment wins.
     </div>
     <span class="close" id="closeBtn" role="button" tabindex="0">Close</span>
@@ -181,7 +182,7 @@
     cashTag:   "CGentry212",      // Cash App cashtag without $
     goal: 496,                    // 1..31 summed
     takenNumbers: [],             // e.g., [7, 12, 21] — update as you go
-    appleCashPhone: "13175077258" // E.164-ish for safety; UI shows friendly number
+    appleCashPhone: "13175077258" // for sms: include country code
   };
 
   function sum(arr){ return arr.reduce((s,x)=>s+x,0); }
@@ -231,10 +232,10 @@
     renderProgress();
   }
 
-  // Apple Cash via SMS/iMessage
+  // Apple Cash via SMS/iMessage (prefilled message)
   function buildAppleCashLink(arr, total){
     const phone = CONFIG.appleCashPhone; // include country code
-    const bodyText = `PSA Fundraiser — I’d like to pay for jerseys ${arr.map(n=>'#'+n).join(', ')}. Total $${total}.`;
+    const bodyText = `PSA Fundraiser - I would like to pay for jerseys ${arr.join(', ')}. Total $${total}.`;
     const body = encodeURIComponent(bodyText);
 
     // iOS Safari uses sms:+1...&body= ; many Androids prefer sms:?body=
@@ -245,21 +246,25 @@
     btn.href = href;
   }
 
+  // ----- UPDATED: payment link builders (fixes for Venmo/PayPal/Cash App) -----
   function buildOtherLinks(total, arr){
-    const note = encodeURIComponent("PSA Fundraiser — Jerseys " + arr.map(n=>"#"+n).join(", "));
-    // Venmo
+    // Use plain numbers in notes (no '#') to avoid weird parsing
+    const numbersDisplay = arr.join(", ");
+
+    // VENMO: amount + note supported; keep ASCII-only message
+    const venNote = encodeURIComponent(`PSA Fundraiser - Jerseys ${numbersDisplay}`);
     const venName = CONFIG.venmoUser;
-    const venApp = `venmo://paycharge?txn=pay&recipients=${encodeURIComponent(venName)}&amount=${total}&note=${note}`;
-    const venWeb = `https://venmo.com/${encodeURIComponent(venName)}?txn=pay&amount=${total}&note=${note}`;
+    const venApp = `venmo://paycharge?txn=pay&recipients=${encodeURIComponent(venName)}&amount=${total}&note=${venNote}`;
+    const venWeb = `https://venmo.com/${encodeURIComponent(venName)}?txn=pay&amount=${total}&note=${venNote}`;
     const venBtn = document.getElementById("payVenmo");
     venBtn.href = venApp;
     venBtn.onclick = function(){ setTimeout(()=>{ window.open(venWeb,"_blank","noopener"); }, 250); };
 
-    // PayPal.me
+    // PAYPAL.ME: amount ONLY (no note in URL). If amount is missing it goes to profile.
     const pp = CONFIG.paypalMe;
-    document.getElementById("payPayPal").href = `https://www.paypal.me/${encodeURIComponent(pp)}/${total}?note=${note}`;
+    document.getElementById("payPayPal").href = `https://www.paypal.me/${encodeURIComponent(pp)}/${total}`;
 
-    // Cash App
+    // CASH APP: amount ONLY; no note support via URL.
     const cash = CONFIG.cashTag;
     document.getElementById("payCashApp").href = `https://cash.app/$${encodeURIComponent(cash)}/${total}`;
   }
