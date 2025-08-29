@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Who Has My Back? — PSA Fundraiser</title>
+<style>
+  :root{
+    --bg:#f7f9fb;
+    --card:#ffffff;
+    --text:#0f172a;
+    --muted:#64748b;
+    --accent:#5AAEB4;
+    --accent-2:#0ea5b9;
+    --taken:#e2e8f0;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+    background:var(--bg);
+    color:var(--text);
+  }
+  header{
+    padding:28px 20px 12px;
+    text-align:center;
+  }
+  header h1{margin:0 0 8px; font-size: clamp(22px, 5vw, 36px); letter-spacing:.2px}
+  header p{margin:0; color:var(--muted); font-size:clamp(14px, 2.8vw, 16px)}
+  .wrap{max-width:1050px; margin:0 auto; padding:20px;}
+  .card{
+    background:var(--card); border-radius:16px; padding:18px;
+    box-shadow: 0 10px 24px rgba(15,23,42,.06);
+  }
+  .legend{
+    display:flex; gap:12px; align-items:center; justify-content:center; flex-wrap:wrap; margin-bottom:12px;
+  }
+  .pill{background:#eef2f7; border-radius:999px; padding:6px 12px; font-size:13px; color:#334155}
+  .grid{
+    display:grid; grid-template-columns: repeat(auto-fit, minmax(88px, 1fr)); gap:12px;
+  }
+  .tile{
+    background:#fff; border:1px solid #e5e7eb; border-radius:14px;
+    padding:16px 10px; text-align:center; cursor:pointer; transition:.18s ease;
+  }
+  .tile:hover{transform: translateY(-2px); box-shadow: 0 8px 18px rgba(15,23,42,.07)}
+  .tile.disabled{cursor:not-allowed; background:var(--taken); color:#94a3b8; border-color:#cbd5e1}
+  .num{font-weight:700; font-size:26px; margin-bottom:6px}
+  .amt{font-size:12px; color:var(--muted)}
+  .cta{margin:18px 0 4px; text-align:center; font-size:14px; color:var(--muted)}
+  footer{max-width:1050px; margin:0 auto; padding:8px 20px 28px; color:#475569; font-size:13px}
+  /* Modal */
+  .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center; background:rgba(15,23,42,.45); padding:20px}
+  .modal.open{display:flex}
+  .sheet{background:#fff; width:min(520px, 100%); border-radius:16px; padding:18px; box-shadow:0 14px 36px rgba(15,23,42,.25)}
+  .sheet h3{margin:8px 0 2px}
+  .sheet p{margin:4px 0 14px; color:#475569}
+  .payrow{display:grid; grid-template-columns:1fr; gap:10px}
+  .btn{
+    display:flex; align-items:center; justify-content:center; gap:10px;
+    border-radius:12px; padding:12px; font-weight:600; text-decoration:none;
+  }
+  .btn.stripe{background:var(--text); color:#fff}
+  .btn.venmo{background:#008cff; color:#fff}
+  .btn.paypal{background:#ffc439; color:#1f2937}
+  .btn.cashapp{background:#00c244; color:#fff}
+  .close{display:inline-block; margin-top:12px; color:#64748b; cursor:pointer}
+  .small{font-size:12px; color:#64748b}
+  .row{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
+  .row input{width:100%; padding:10px 12px; border:1px solid #e5e7eb; border-radius:10px; font-size:14px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Who Has My Back?</h1>
+  <p>Pick a jersey number (1–31) and pay that amount. Every dollar supports classroom supplies, scholarships, and student-led projects.</p>
+</header>
+
+<div class="wrap">
+  <div class="card">
+    <div class="legend">
+      <span class="pill">Tap a number to donate</span>
+      <span class="pill">Numbers gray out when taken</span>
+    </div>
+    <div id="grid" class="grid"></div>
+    <div class="cta">Questions? Email <a href="#" id="contactEmail">cody.gentry@example.com</a></div>
+  </div>
+</div>
+
+<footer>
+  <div><strong>Tip:</strong> Venmo, PayPal, and Cash App links will prefill the exact amount and a note. Apple Pay is available via Stripe checkout.</div>
+</footer>
+
+<!-- Modal -->
+<div id="modal" class="modal" role="dialog" aria-modal="true">
+  <div class="sheet">
+    <h3 id="title">Donate</h3>
+    <p>Select a payment method for jersey <strong id="jerseyNum"></strong>.</p>
+
+    <div class="row">
+      <input id="donorName" placeholder="Your name (optional for donor wall)" />
+    </div>
+
+    <div class="payrow" style="margin-top:10px">
+      <a id="payStripe" class="btn stripe" target="_blank" rel="noopener">Apple Pay / Card (Stripe)</a>
+      <a id="payVenmo" class="btn venmo" target="_blank" rel="noopener">Venmo</a>
+      <a id="payPayPal" class="btn paypal" target="_blank" rel="noopener">PayPal</a>
+      <a id="payCashApp" class="btn cashapp" target="_blank" rel="noopener">Cash App</a>
+    </div>
+    <div class="small" style="margin-top:8px">Your amount will be <span id="amtShow">$0</span>. Notes include your jersey number automatically.</div>
+
+    <div class="small" style="margin-top:10px">After you complete payment, this number will be marked as taken by an admin.</div>
+    <span class="close" id="closeBtn">Close</span>
+  </div>
+</div>
+
+<script>
+  // === CONFIG ===
+  const CONFIG = {
+    // Payment handles / links (replace these)
+    venmoUser: "Csgentry",      // e.g., "CodyGentry"
+    paypalMe:  "CodyGentry",       // e.g., "PSAParentCommittee"
+    cashTag:   "CGentry212",        // e.g., "PSAParents"
+    // Stripe Payment Link that supports Apple Pay & custom amount (single link)
+    // Example: https://buy.stripe.com/test_12345
+    stripePaymentLink: "#",
+    // Contact email for questions
+    contactEmail: "cody.gentry@example.com",
+    // Pre-mark taken numbers if needed:
+    takenNumbers: [] // e.g., [7, 12, 21]
+  };
+
+  document.getElementById("contactEmail").textContent = CONFIG.contactEmail;
+  document.getElementById("contactEmail").href = "mailto:" + CONFIG.contactEmail;
+
+  // Build grid 1..31
+  const grid = document.getElementById("grid");
+  for (let n=1;n<=31;n++){
+    const el = document.createElement("button");
+    el.className = "tile";
+    el.innerHTML = `<div class="num">${n}</div><div class="amt">$${n}</div>`;
+    el.setAttribute("aria-label", "Select number " + n + " to donate $" + n);
+    if(CONFIG.takenNumbers.includes(n)){
+      el.classList.add("disabled"); el.disabled = true; el.title = "Taken";
+    }else{
+      el.addEventListener("click", ()=>openModal(n));
+    }
+    grid.appendChild(el);
+  }
+
+  const modal = document.getElementById("modal");
+  const closeBtn = document.getElementById("closeBtn");
+  closeBtn.addEventListener("click", ()=>modal.classList.remove("open"));
+  modal.addEventListener("click", (e)=>{ if(e.target===modal){ modal.classList.remove("open"); } });
+
+  function openModal(number){
+    modal.classList.add("open");
+    const amt = number;
+    const noteBase = encodeURIComponent(`PSA Fundraiser — Jersey #${number}`);
+    const donorName = document.getElementById("donorName");
+
+    document.getElementById("jerseyNum").textContent = "#" + number;
+    document.getElementById("amtShow").textContent = `$${amt}`;
+
+    // Apple Pay / Card via Stripe (single link; donor enters amount on Stripe page)
+    // We pass a client_reference_id so you know which number they tapped
+    const stripeBase = CONFIG.stripePaymentLink;
+    const sri = encodeURIComponent(`jersey-${number}`);
+    document.getElementById("payStripe").href = `${stripeBase}?client_reference_id=${sri}`;
+
+    // Venmo deep link (mobile): app schema + web fallback
+    const venName = CONFIG.venmoUser;
+    const venApp = `venmo://paycharge?txn=pay&recipients=${encodeURIComponent(venName)}&amount=${amt}&note=${noteBase}`;
+    const venWeb = `https://venmo.com/${encodeURIComponent(venName)}?txn=pay&amount=${amt}&note=${noteBase}`;
+    document.getElementById("payVenmo").href = venApp;
+    document.getElementById("payVenmo").onclick = function(e){
+      // try app, then fallback to web after 200ms
+      setTimeout(()=>{ window.open(venWeb, "_blank"); }, 200);
+    };
+
+    // PayPal.me prefilled
+    const pp = CONFIG.paypalMe;
+    document.getElementById("payPayPal").href = `https://www.paypal.me/${encodeURIComponent(pp)}/${amt}?note=${noteBase}`;
+
+    // Cash App prefilled
+    const cash = CONFIG.cashTag;
+    document.getElementById("payCashApp").href = `https://cash.app/$${encodeURIComponent(cash)}/${amt}`;
+  }
+</script>
+</body>
+</html>
