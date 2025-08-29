@@ -7,10 +7,9 @@
 <meta name="description" content="Pick one or more jersey numbers (1–31) and donate the total. Supports classroom supplies, scholarships, and student-led projects at Premier Soccer Academy.">
 <style>
   :root{
-    /* PSA palette (from crest) */
-    --psa-blue:#003DA5;     /* primary banner blue */
-    --psa-blue-2:#2857C5;   /* hover state */
-    --psa-gray:#7D7D7D;     /* crest silver */
+    --psa-blue:#003DA5;     /* primary */
+    --psa-blue-2:#2857C5;   /* hover */
+    --psa-gray:#7D7D7D;
     --bg:#F6F8FC;
     --surface:#FFFFFF;
     --ink:#0F172A;
@@ -23,10 +22,9 @@
   html,body{height:100%}
   body{
     margin:0; background:var(--bg); color:var(--ink);
-    font-family:ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Apple Color Emoji, Segoe UI Emoji;
+    font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,Apple Color Emoji,Segoe UI Emoji;
     line-height:1.45;
-    /* room for sticky footer so content never sits behind it */
-    padding-bottom:96px;
+    padding-bottom:96px; /* space for sticky bar */
   }
 
   header{text-align:center; padding:20px 16px 10px}
@@ -67,12 +65,12 @@
 
   .cta{margin:8px 0 0; text-align:center; font-size:14px; color:#64748B}
 
-  /* Sticky footer bar (taller, no overlap) */
+  /* Sticky footer bar */
   .footerBar{
     position:fixed; bottom:0; left:0; right:0;
     background:rgba(255,255,255,.98); backdrop-filter:saturate(180%) blur(8px);
     border-top:3px solid var(--psa-blue);
-    padding:16px 16px; box-shadow:0 -8px 18px rgba(15,23,42,.06);
+    padding:16px; box-shadow:0 -8px 18px rgba(15,23,42,.06);
     z-index:5000;
   }
   .barInner{max-width:1100px; margin:0 auto; display:flex; gap:12px; align-items:center; justify-content:space-between; flex-wrap:wrap}
@@ -86,7 +84,7 @@
   .taglist{display:inline-flex; gap:6px; flex-wrap:wrap; margin-left:8px; vertical-align:middle}
   .tag{background:#EEF2F7; color:#334155; padding:4px 8px; border-radius:999px; font-size:12px}
 
-  /* Modal: darker overlay + page lock + higher z-index */
+  /* Modal */
   .modal{position:fixed; inset:0; display:none; align-items:center; justify-content:center;
     background:rgba(15,23,42,.78); backdrop-filter:blur(6px); padding:20px; z-index:9999}
   .modal.open{display:flex}
@@ -96,27 +94,20 @@
   .payrow{display:grid; grid-template-columns:1fr; gap:10px}
   .btn{display:flex; align-items:center; justify-content:center; gap:10px;
     border-radius:12px; padding:12px; font-weight:800; text-decoration:none; border:1px solid var(--border)}
-  .btn.stripe{background:#111827; color:#fff}
+  .btn.applecash{background:#111827; color:#fff}
   .btn.venmo{background:#008cff; color:#fff}
   .btn.paypal{background:#ffc439; color:#111827}
   .btn.cashapp{background:#00c244; color:#fff}
   .close{display:inline-block; margin-top:12px; color:#64748b; cursor:pointer}
   .small{font-size:12px; color:#64748b}
 
-  /* Amount helper row for Stripe */
-  .amountRow{display:flex; gap:8px; align-items:center; margin-top:6px}
-  .amountRow input{flex:1; border:1px solid var(--border); border-radius:10px; padding:10px 12px; font-weight:700}
-  .copyBtn{border:1px solid var(--border); background:#F8FAFC; border-radius:10px; padding:10px 12px; cursor:pointer}
-  .copyBtn:hover{background:#EEF2F7}
-
-  /* Hide sticky bar when modal is open + lock scroll */
+  /* Page lock when modal open */
   body.modal-open{overflow:hidden}
   .modal.open ~ .footerBar{display:none}
 </style>
 </head>
 <body>
 <header>
-  <!-- PSA logo file lives next to this HTML -->
   <img src="psa-logo.png" alt="Premier Soccer Academy crest" class="crest">
   <h1>Who Has My Back?</h1>
   <p class="sub">Pick one or more jersey numbers (1–31) and donate the total. 100% of proceeds support classroom supplies, scholarships, and student-led projects.</p>
@@ -164,25 +155,18 @@
   <div class="sheet">
     <h3 id="modalTitle">Complete Your Donation</h3>
     <p>You're donating for jersey number(s): <strong id="nums"></strong></p>
-    <p>Jersey total: <strong id="amtShow">$0</strong><br>
-       With fees (Stripe): <strong id="amtWithFees">$0</strong></p>
+    <p>Total amount: <strong id="amtShow">$0</strong></p>
 
     <div class="payrow" style="margin-top:10px">
-      <a id="payStripe" class="btn stripe" target="_blank" rel="noopener">Pay with Apple Pay / Card</a>
+      <a id="payAppleCash" class="btn applecash" target="_blank" rel="noopener">Text to Pay (Apple Cash)</a>
       <a id="payVenmo" class="btn venmo" target="_blank" rel="noopener">Pay with Venmo</a>
       <a id="payPayPal" class="btn paypal" target="_blank" rel="noopener">Pay with PayPal</a>
       <a id="payCashApp" class="btn cashapp" target="_blank" rel="noopener">Pay with Cash App</a>
     </div>
 
-    <!-- Visible helper so donors can paste into Stripe -->
-    <div class="amountRow" id="stripeHelper">
-      <input id="amtInput" type="text" value="$0" aria-label="Amount to enter on Stripe" readonly>
-      <button class="copyBtn" id="copyBtn" type="button">Copy</button>
-      <span class="small" id="copyMsg" style="margin-left:4px;display:none;">Copied</span>
-    </div>
-
     <div class="small" style="margin-top:8px">
-      Notes include “PSA Fundraiser — Jerseys #X, #Y”. If a number is double-selected, first completed payment wins.
+      The Apple Cash button opens a text to <strong>317-507-7258</strong> with your jersey numbers and total pre-filled.
+      If a number is double-selected, first completed payment wins.
     </div>
     <span class="close" id="closeBtn" role="button" tabindex="0">Close</span>
   </div>
@@ -195,16 +179,11 @@
     venmoUser: "Csgentry",        // Venmo username without @
     paypalMe:  "CodyGentry",      // PayPal.me handle without @
     cashTag:   "CGentry212",      // Cash App cashtag without $
-    stripePaymentLink: "https://buy.stripe.com/8x29AL9xW2rM5Hc1Dx9Zm00", // your live link
-    feePassThrough: true,         // donor covers Stripe fee on Stripe button
     goal: 496,                    // 1..31 summed
-    takenNumbers: []              // e.g., [7, 12, 21] — update as you go
+    takenNumbers: [],             // e.g., [7, 12, 21] — update as you go
+    appleCashPhone: "13175077258" // E.164-ish for safety; UI shows friendly number
   };
 
-  function grossUp(amount) {
-    if (!CONFIG.feePassThrough) return amount;
-    return Math.round(((amount + 0.30) / 0.971) * 100) / 100; // 2.9% + $0.30
-  }
   function sum(arr){ return arr.reduce((s,x)=>s+x,0); }
 
   const selected = new Set();
@@ -246,35 +225,25 @@
     document.getElementById("payBtn").disabled = arr.length===0;
     document.getElementById("nums").textContent = arr.map(n=>`#${n}`).join(", ");
     document.getElementById("amtShow").textContent = `$${total}`;
-    const withFees = grossUp(total);
-    document.getElementById("amtWithFees").textContent = `$${withFees.toFixed(2)}`;
 
-    // Stripe helper values
-    document.getElementById("amtInput").value = `$${withFees.toFixed(2)}`;
-
-    buildStripeBehavior(withFees);
+    buildAppleCashLink(arr, total);
     buildOtherLinks(total, arr);
     renderProgress();
   }
 
-  // Stripe: open link + Copy helper
-  function buildStripeBehavior(withFees){
-    const btn = document.getElementById("payStripe");
-    const link = CONFIG.stripePaymentLink;
-    if (!link){ btn.style.display="none"; return; }
-    btn.href = link; // donor enters/pastes the amount on the Stripe page
-  }
+  // Apple Cash via SMS/iMessage
+  function buildAppleCashLink(arr, total){
+    const phone = CONFIG.appleCashPhone; // include country code
+    const bodyText = `PSA Fundraiser — I’d like to pay for jerseys ${arr.map(n=>'#'+n).join(', ')}. Total $${total}.`;
+    const body = encodeURIComponent(bodyText);
 
-  // Copy button
-  const copyBtn = document.getElementById("copyBtn");
-  copyBtn.addEventListener("click", ()=>{
-    const amt = document.getElementById("amtInput").value.replace('$','');
-    navigator.clipboard?.writeText(amt).then(()=>{
-      const msg = document.getElementById("copyMsg");
-      msg.style.display = "inline";
-      setTimeout(()=>{ msg.style.display = "none"; }, 1500);
-    });
-  });
+    // iOS Safari uses sms:+1...&body= ; many Androids prefer sms:?body=
+    const isiOS = /iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent);
+    const href = isiOS ? `sms:${phone}&body=${body}` : `sms:${phone}?body=${body}`;
+
+    const btn = document.getElementById("payAppleCash");
+    btn.href = href;
+  }
 
   function buildOtherLinks(total, arr){
     const note = encodeURIComponent("PSA Fundraiser — Jerseys " + arr.map(n=>"#"+n).join(", "));
@@ -303,7 +272,7 @@
   modal.addEventListener("click", (e)=>{ if(e.target===modal){ modal.classList.remove("open"); bodyEl.classList.remove("modal-open"); } });
 
   function renderProgress(){
-    const raised = CONFIG.takenNumbers.reduce((acc,n)=>acc+n,0); // manual: update this array as numbers are claimed
+    const raised = CONFIG.takenNumbers.reduce((acc,n)=>acc+n,0); // update this array as numbers are claimed
     const pct = Math.max(0, Math.min(100, (raised/CONFIG.goal)*100));
     document.getElementById("bar").style.width = pct + "%";
     document.getElementById("raisedLabel").textContent = `$${raised} raised`;
