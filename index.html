@@ -49,11 +49,16 @@
   .tile.selected{border-color:var(--psa-blue);background:radial-gradient(circle at 50% 50%,#fff 35%,#E7F0FF 100%)}
 
   /* TAKEN tiles: supporter name only */
-  .tile.taken{cursor:not-allowed;background:var(--taken);border-color:#D7DEE8;box-shadow:none;padding:8px;display:flex;align-items:center;justify-content:center}
+  .tile.taken{
+    cursor:not-allowed;background:var(--taken);border-color:#D7DEE8;box-shadow:none;
+    padding:8px;display:flex;align-items:center;justify-content:center;text-align:center
+  }
   .tile.taken .name{
-    font-weight:700;font-size:13px;color:#334155;line-height:1.15;text-align:center;
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
-    max-width:90%; /* ensures it doesn’t spill outside circle */
+    font-weight:700;font-size:13px;color:#334155;line-height:1.2;text-align:center;
+    white-space:normal;         /* allow wrapping at spaces */
+    word-break:keep-all;        /* prevent splitting inside words */
+    overflow-wrap:break-word;   /* allow wrapping on spaces */
+    max-width:90%;
   }
   .tile.taken .num, .tile.taken .amt{display:none}
 
