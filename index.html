@@ -48,10 +48,12 @@
   .tile .amt{font-size:12px;color:#667085;margin-top:4px}
   .tile.selected{border-color:var(--psa-blue);background:radial-gradient(circle at 50% 50%,#fff 35%,#E7F0FF 100%)}
 
-  /* TAKEN tiles: show only supporter name */
-  .tile.taken{cursor:not-allowed;background:var(--taken);border-color:#D7DEE8;box-shadow:none;padding:12px}
+  /* TAKEN tiles: supporter name only */
+  .tile.taken{cursor:not-allowed;background:var(--taken);border-color:#D7DEE8;box-shadow:none;padding:8px;display:flex;align-items:center;justify-content:center}
   .tile.taken .name{
-    font-weight:700;font-size:13px;color:#334155;line-height:1.15;text-align:center;padding:0 8px;word-break:break-word
+    font-weight:700;font-size:13px;color:#334155;line-height:1.15;text-align:center;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    max-width:90%; /* ensures it doesn’t spill outside circle */
   }
   .tile.taken .num, .tile.taken .amt{display:none}
 
@@ -86,7 +88,6 @@
 </div>
 
 <div class="wrap">
-  <!-- PROGRESS CARD -->
   <section class="card">
     <strong>Fundraiser Progress</strong>
     <div class="progress"><div id="bar"></div></div>
@@ -96,7 +97,6 @@
     </div>
   </section>
 
-  <!-- GRID -->
   <section class="card">
     <div class="legend">
       <span class="pill">Tap to select multiple numbers</span>
@@ -106,7 +106,6 @@
   </section>
 </div>
 
-<!-- STICKY CTA -->
 <div class="footerBar" role="region" aria-live="polite">
   <div class="barInner">
     <div class="summary"><span id="count">0</span> selected · Total <strong id="total">$0</strong></div>
@@ -114,7 +113,6 @@
   </div>
 </div>
 
-<!-- MODAL -->
 <div id="modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
   <div class="sheet">
     <h3 id="modalTitle">Complete Your Donation</h3>
@@ -136,14 +134,12 @@
 </div>
 
 <script>
-  // ===== CONFIG =====
   const CONFIG = {
     venmoUser: "Csgentry",
     paypalMe:  "CodyGentry",
     cashTag:   "CGentry212",
     appleCashPhone: "13175077258",
     goal: 496,
-    // Taken entries include supporter names; tiles show the name only.
     taken: [
       { num: 10, name: "Natalie Sorrells" },
       { num: 20, name: "Carla & Paul Utley" },
@@ -154,11 +150,9 @@
   };
 
   function sum(arr){ return arr.reduce((s,x)=>s+x,0); }
-
   const takenMap = new Map(CONFIG.taken.map(t => [t.num, t.name]));
   const takenNums = CONFIG.taken.map(t => t.num);
 
-  // Build grid
   const grid = document.getElementById("grid");
   const selected = new Set();
 
@@ -244,7 +238,6 @@
     document.getElementById("payCashApp").href = `https://cash.app/$${encodeURIComponent(CONFIG.cashTag)}/${total}`;
   }
 
-  // Initial render (also updates progress to show $106 raised)
   render();
 </script>
 </body>
