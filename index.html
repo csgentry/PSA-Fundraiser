@@ -48,16 +48,16 @@
   .tile .amt{font-size:12px;color:#667085;margin-top:4px}
   .tile.selected{border-color:var(--psa-blue);background:radial-gradient(circle at 50% 50%,#fff 35%,#E7F0FF 100%)}
 
-  /* TAKEN tiles: supporter name only */
+  /* TAKEN tiles: supporter name only (wrap at spaces, never split inside a word) */
   .tile.taken{
     cursor:not-allowed;background:var(--taken);border-color:#D7DEE8;box-shadow:none;
     padding:8px;display:flex;align-items:center;justify-content:center;text-align:center
   }
   .tile.taken .name{
     font-weight:700;font-size:13px;color:#334155;line-height:1.2;text-align:center;
-    white-space:normal;         /* allow wrapping at spaces */
-    word-break:keep-all;        /* prevent splitting inside words */
-    overflow-wrap:break-word;   /* allow wrapping on spaces */
+    white-space:normal;        /* allow wrapping at spaces */
+    word-break:keep-all;       /* prevent splitting inside words */
+    overflow-wrap:break-word;  /* wrap long names at spaces */
     max-width:90%;
   }
   .tile.taken .num, .tile.taken .amt{display:none}
@@ -147,8 +147,10 @@
     goal: 496,
     taken: [
       { num: 10, name: "Natalie Sorrells" },
+      { num: 12, name: "Bill & Karen Sorrells" },  // NEW
       { num: 20, name: "Carla & Paul Utley" },
       { num: 21, name: "Georgia Beardsworth" },
+      { num: 23, name: "Bill & Karen Sorrells" },  // NEW
       { num: 25, name: "Loree Lawyer" },
       { num: 30, name: "Carla & Paul Utley" }
     ]
